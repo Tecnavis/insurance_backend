@@ -11,9 +11,9 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = True
 
-# ALLOWED_HOSTS = ['13.126.77.40', 'https://api.neo.tecnavis.com','127.0.0.1']
+ALLOWED_HOSTS = []
 
-ALLOWED_HOSTS = ['13.126.77.40','api.neo.tecnavis.com','localhost','127.0.0.1','neo.tecnavis.com',]
+
 
 INSTALLED_APPS = [
     'corsheaders', 
@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     "main",
     "users",
     'financials',
+    'insurance',
     
 ]
 
@@ -89,7 +90,6 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5174",
-    "https://neo.tecnavis.com"
 
 ]
 
