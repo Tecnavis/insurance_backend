@@ -8,11 +8,10 @@ from rest_framework.decorators import permission_classes
 from rest_framework import status
 
 
-
 # create insurance
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def create_insurance_policy(request):
+def create_insurance(request):
     serializer = InsurancePolicySerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
@@ -22,7 +21,7 @@ def create_insurance_policy(request):
 #update insurance
 @api_view(['PUT'])
 @permission_classes([AllowAny])
-def update_insurance_policy(request, pk):
+def update_insurance(request, pk):
     try:
         insurance = Insurance.objects.get(pk=pk)
     except Insurance.DoesNotExist:    
@@ -36,7 +35,7 @@ def update_insurance_policy(request, pk):
 # delete insurance
 @api_view(['DELETE'])
 @permission_classes([AllowAny])
-def delete_insurance_policy(request, pk):
+def delete_insurance(request, pk):
     try:
         insurance = Insurance.objects.get(pk=pk)
     except Insurance.DoesNotExist:
@@ -70,12 +69,22 @@ def list_expiring_insurance_policies(request):
 # list all insurance data
 @api_view(['GET'])
 @permission_classes([AllowAny]) 
-def list_all_insurance_policies(request):
+def insurance_list(request):
     policies = Insurance.objects.all()
     serializer = InsurancePolicySerializer(policies, many=True)
     return Response(serializer.data)    
 
 
+# insurance_detail
+@api_view(['GET'])  
+@permission_classes([AllowAny])
+def insurance_detail(request, pk):
+    try:
+        policy = Insurance.objects.get(pk=pk)
+    except Insurance.DoesNotExist:        
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    serializer = InsurancePolicySerializer(policy)
+    return Response(serializer.data)
 
 # list all the insurance policies
 @api_view(['GET'])
