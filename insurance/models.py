@@ -3,16 +3,19 @@ from django.utils import timezone
 from datetime import timedelta
 from django.utils.translation import gettext_lazy as _
 
-class Category(models.Model):
-    name = models.CharField(max_length=100, unique=True)
+
+class InsuranceCategory(models.Model):
+    name = models.CharField(max_length=100, unique=True)  
+    description = models.TextField(blank=True, null=True) 
+    is_active = models.BooleanField(default=True) 
 
     def __str__(self):
         return self.name
 
 
-class SubCategory(models.Model):
+class InsuranceSubCategory(models.Model):
     name = models.CharField(max_length=100)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="subcategories")
+    category = models.ForeignKey(InsuranceCategory, on_delete=models.CASCADE, related_name="subcategories")
 
     def __str__(self):
         return f"{self.category.name} - {self.name}"
@@ -31,8 +34,8 @@ class Insurance(models.Model):
     customer_email = models.EmailField()
     customer_phone = models.CharField(max_length=15)
     insurance_type = models.CharField(max_length=50)
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name="insurances")
-    sub_category = models.ForeignKey(SubCategory, on_delete=models.SET_NULL, null=True, related_name="insurances")
+    category = models.ForeignKey(InsuranceCategory, on_delete=models.SET_NULL, null=True, related_name="insurances")
+    sub_category = models.ForeignKey(InsuranceSubCategory, on_delete=models.SET_NULL, null=True, related_name="insurances")
     premium_amount = models.DecimalField(max_digits=10, decimal_places=2)
     start_date = models.DateField()
     expiry_date = models.DateField()

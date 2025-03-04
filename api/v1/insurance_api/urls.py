@@ -10,5 +10,10 @@ urlpatterns = [
     path('insurances/create/', views.create_insurance, name='create_insurance'),
     path('insurances/<int:id>/', views.update_insurance, name='update_insurance'),
     path('insurances/<int:id>/', views.delete_insurance, name='delete_insurance'),
+
+    path('categories/', views.category_list, name='category_list'),
+    path('categories/create/', views.create_category, name='create_category'),
+    path('categories/<int:id>/', views.update_category, name='update_category'),
+    path('categories/<int:id>/delete/', views.delete_category, name='delete_category'),
    
 ]

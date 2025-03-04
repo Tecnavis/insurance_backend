@@ -1,6 +1,7 @@
 from datetime import timezone
 from rest_framework import serializers
 from insurance.models import Insurance
+from insurance.models import InsuranceCategory, InsuranceSubCategory  
 
 class InsurancePolicySerializer(serializers.ModelSerializer):
     days_remaining = serializers.SerializerMethodField()
@@ -21,3 +22,14 @@ class InsurancePolicySerializer(serializers.ModelSerializer):
             remaining = (obj.expiry_date - today).days
             return max(0, remaining)
         return 0
+    
+class InsuranceCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InsuranceCategory
+        fields = ['id', 'name', 'description', 'is_active']
+       
+
+class InsuranceSubCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InsuranceSubCategory
+        fields = ['id', 'name', 'category'] 

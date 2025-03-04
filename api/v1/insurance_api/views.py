@@ -6,6 +6,65 @@ from .serializers import InsurancePolicySerializer
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import permission_classes
 from rest_framework import status
+from insurance.models import InsuranceSubCategory, InsuranceCategory
+from .serializers import InsuranceCategorySerializer, InsuranceSubCategorySerializer
+from rest_framework.permissions import IsAuthenticated
+
+
+# listing  category
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def category_list(request):
+    print(request.data)
+    categories = InsuranceCategory.objects.all()
+    serializer = InsuranceCategorySerializer(categories, many=True)
+    return Response(serializer.data)
+
+# create category
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def create_category(request):
+    print(request.data)
+    serializer = InsuranceCategorySerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=201)
+    return Response(serializer.errors, status=400)
+
+# update category
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_category(request, id):    
+    try:
+        category = InsuranceCategory.objects.get(id=id)
+    except InsuranceCategory.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    serializer = InsuranceCategorySerializer(category, data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# delete category
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_category(request, id):
+    try:
+        category = InsuranceCategory.objects.get(id=id)
+    except InsuranceCategory.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    category.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def subcategory_list(request):
+    subcategories = InsuranceSubCategory.objects.all()
+    serializer = InsuranceSubCategorySerializer(subcategories, many=True)
+    return Response(serializer.data)
+
 
 
 # create insurance
@@ -129,5 +188,6 @@ def list_insurance_policies(request):
         'page_size': page_size,
         'results': serializer.data
     })
+
 
 
