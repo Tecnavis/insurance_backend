@@ -27,9 +27,16 @@ class InsuranceCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = InsuranceCategory
         fields = ['id', 'name', 'description', 'is_active']
-       
 
 class InsuranceSubCategorySerializer(serializers.ModelSerializer):
+    category_id = serializers.PrimaryKeyRelatedField(
+        queryset=InsuranceCategory.objects.all(),
+        source='category', 
+        write_only=True
+    )
+
+    category = InsuranceCategorySerializer(read_only=True) 
+
     class Meta:
         model = InsuranceSubCategory
-        fields = ['id', 'name', 'category'] 
+        fields = ['id', 'name','description_subcategory', 'category', 'category_id',]

@@ -11,7 +11,8 @@ from .serializers import InsuranceCategorySerializer, InsuranceSubCategorySerial
 from rest_framework.permissions import IsAuthenticated
 
 
-# listing  category
+# CRUD INSURANCE CATEGORY
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def category_list(request):
@@ -20,7 +21,7 @@ def category_list(request):
     serializer = InsuranceCategorySerializer(categories, many=True)
     return Response(serializer.data)
 
-# create category
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def create_category(request):
@@ -31,21 +32,18 @@ def create_category(request):
         return Response(serializer.data, status=201)
     return Response(serializer.errors, status=400)
 
-# update category
+
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def update_category(request, id):    
-    try:
-        category = InsuranceCategory.objects.get(id=id)
-    except InsuranceCategory.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+    category = InsuranceCategory.objects.get(id=id)
     serializer = InsuranceCategorySerializer(category, data=request.data)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# delete category
+
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def delete_category(request, id):
@@ -57,16 +55,57 @@ def delete_category(request, id):
     return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+# CRUD INSURANCE SUB-CATEGORY
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def subcategory_list(request):
+def list_subcategories(request):
     subcategories = InsuranceSubCategory.objects.all()
+    print(subcategories)
     serializer = InsuranceSubCategorySerializer(subcategories, many=True)
     return Response(serializer.data)
 
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_subcategory(request):
+    print(request.data)
+    serializer = InsuranceSubCategorySerializer(data=request.data)
+    print(serializer.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+@api_view(['PUT', 'PATCH'])
+@permission_classes([IsAuthenticated])
+def update_subcategory(request, subcategory_id):
+    try:
+        subcategory = InsuranceSubCategory.objects.get(id=subcategory_id)
+    except InsuranceSubCategory.DoesNotExist:
+        return Response({'error': 'Subcategory not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = InsuranceSubCategorySerializer(subcategory, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_subcategory(request, subcategory_id):
+    try:
+        subcategory = InsuranceSubCategory.objects.get(id=subcategory_id)
+        subcategory.delete()
+        return Response({'message': 'Subcategory deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+    except InsuranceSubCategory.DoesNotExist:
+        return Response({'error': 'Subcategory not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+# CRUD INSURANCE 
 # create insurance
 @api_view(['POST'])
 @permission_classes([AllowAny])
