@@ -1,6 +1,4 @@
 from django.db import models
-from django.utils import timezone
-from datetime import timedelta
 from users.models import CustomUser
 from django.utils.translation import gettext_lazy as _
 
@@ -22,10 +20,28 @@ class InsuranceSubCategory(models.Model):
         return f"{self.category.name} - {self.name}"
 
 class PolicyOwner(models.Model):
+    GENDER_CHOICES = (
+        ("Male", _("Male")),
+        ("Female", _("Female")),
+        ("Other", _("Other")),
+    )
+
+    MARITAL_STATUS_CHOICES = (
+        ("Single", _("Single")),
+        ("Married", _("Married")),
+        ("Divorced", _("Divorced")),
+        ("Widowed", _("Widowed")),
+    )
+
     user = models.OneToOneField(CustomUser,on_delete=models.CASCADE,related_name='policy_owner')
+    marital_status = models.CharField(max_length=10,choices=MARITAL_STATUS_CHOICES,null=True,blank=True)
+    gender = models.CharField(max_length=10,choices=GENDER_CHOICES,null=True,blank=True)
     address = models.TextField(null=True, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
     alternative_phone = models.CharField(max_length=15, null=True, blank=True)
+    nominee_name = models.CharField(max_length=255, null=True, blank=True)
+    nominee_dob = models.DateField(null=True, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -45,7 +61,7 @@ class Insurance(models.Model):
         ("pending", "Pending"),
         ("cancelled", "Cancelled"),
     )
-    
+
     policy_owner = models.ForeignKey(PolicyOwner,on_delete=models.CASCADE, related_name='insurance_policies',null=True,blank=True)
     policy_number = models.CharField(max_length=20, unique=True)
     insurance_type = models.CharField(max_length=50)
