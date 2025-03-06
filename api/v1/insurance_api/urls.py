@@ -20,5 +20,8 @@ urlpatterns = [
     path('subcategories/create/', views.create_subcategory, name='create_subcategory'),
     path('subcategories/<int:subcategory_id>/', views.update_subcategory, name='update_subcategory'),
     path('subcategories/<int:subcategory_id>/delete/', views.delete_subcategory, name='delete_subcategory'),
+
+
+    path("policy-owner/create/", views.create_policy_owner, name="create-policy-owner"),
    
 ]

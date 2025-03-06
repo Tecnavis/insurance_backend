@@ -32,15 +32,15 @@ class PolicyOwner(models.Model):
         ("Divorced", _("Divorced")),
         ("Widowed", _("Widowed")),
     )
-
-    user = models.OneToOneField(CustomUser,on_delete=models.CASCADE,related_name='policy_owner')
+    username = models.CharField(max_length=255)
+    email=models.EmailField(unique=True)
+    contact_number = models.CharField(max_length=15)
     marital_status = models.CharField(max_length=10,choices=MARITAL_STATUS_CHOICES,null=True,blank=True)
     gender = models.CharField(max_length=10,choices=GENDER_CHOICES,null=True,blank=True)
     address = models.TextField(null=True, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
     alternative_phone = models.CharField(max_length=15, null=True, blank=True)
     nominee_name = models.CharField(max_length=255, null=True, blank=True)
-    nominee_dob = models.DateField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

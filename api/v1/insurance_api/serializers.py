@@ -1,7 +1,7 @@
 from datetime import timezone
 from rest_framework import serializers
-from insurance.models import Insurance
-from insurance.models import InsuranceCategory, InsuranceSubCategory  
+from datetime import datetime  
+from insurance.models import InsuranceCategory, InsuranceSubCategory ,PolicyOwner,Insurance
 
 class InsurancePolicySerializer(serializers.ModelSerializer):
     days_remaining = serializers.SerializerMethodField()
@@ -40,3 +40,20 @@ class InsuranceSubCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = InsuranceSubCategory
         fields = ['id', 'name','description_subcategory', 'category', 'category_id',]
+
+
+class PolicyOwnerSerializer(serializers.ModelSerializer):
+    date_of_birth = serializers.CharField()
+
+    class Meta:
+        model = PolicyOwner
+        fields = "__all__"
+        read_only_fields = ["user", "created_at", "updated_at"]
+
+    def validate_date_of_birth(self, value):
+        """Convert dd-MM-yyyy to YYYY-MM-DD"""
+        try:
+            return datetime.strptime(value, "%d-%m-%Y").date()
+        except ValueError:
+            raise serializers.ValidationError("Invalid date format. Use dd-MM-yyyy.")
+

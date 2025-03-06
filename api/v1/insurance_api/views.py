@@ -6,9 +6,10 @@ from .serializers import InsurancePolicySerializer
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import permission_classes
 from rest_framework import status
-from insurance.models import InsuranceSubCategory, InsuranceCategory
-from .serializers import InsuranceCategorySerializer, InsuranceSubCategorySerializer
+from insurance.models import InsuranceSubCategory, InsuranceCategory,PolicyOwner
+from .serializers import InsuranceCategorySerializer, InsuranceSubCategorySerializer,PolicyOwnerSerializer
 from rest_framework.permissions import IsAuthenticated
+from users.models import CustomUser
 
 
 # CRUD INSURANCE CATEGORY
@@ -72,7 +73,6 @@ def list_subcategories(request):
 def create_subcategory(request):
     print(request.data)
     serializer = InsuranceSubCategorySerializer(data=request.data)
-    print(serializer.data)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -228,5 +228,74 @@ def list_insurance_policies(request):
         'results': serializer.data
     })
 
+# ------------------------------------------------------------------------------------
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_policy_owner(request):
+    """
+    Create a Policy Owner record for a user (even if they don't have login access).
+    Only admins, super admins, or staff can perform this action.
+    """
+    serializer = PolicyOwnerSerializer(data=request.data)
+    
+    if serializer.is_valid():
+        username = serializer.validated_data.get("username")
+        email = serializer.validated_data.get("email")
+        contact_number = serializer.validated_data.get("contact_number")
+        marital_status = serializer.validated_data.get("marital_status")
+        gender = serializer.validated_data.get("gender")
+        address = serializer.validated_data.get("address")
+        alternative_phone = serializer.validated_data.get("alternative_phone")
+        nominee_name = serializer.validated_data.get("nominee_name")
+        date_of_birth = serializer.validated_data.get("date_of_birth")
 
+        # Ensure required fields are provided
+        if not username or not email or not contact_number:
+            return Response(
+                {"status": 400, "title": "Missing Data", "message": "Username, email, and contact number are required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Check if a PolicyOwner record already exists for this email
+        if PolicyOwner.objects.filter(email=email).exists():
+            return Response(
+                {
+                    "status": 400,
+                    "title": "Already Exists",
+                    "message": "Policy owner record already exists for this email."
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Create PolicyOwner record
+        policy_owner = PolicyOwner.objects.create(
+            username=username,
+            email=email,
+            contact_number=contact_number,
+            marital_status=marital_status,
+            gender=gender,
+            address=address,
+            alternative_phone=alternative_phone,
+            nominee_name=nominee_name,
+            date_of_birth=date_of_birth,
+        )
+
+        response_data = {
+            "status": 200,
+            "title": "Successfully Created",
+            "message": "Policy owner created successfully.",
+            "data": serializer.data,
+            "redirect": "true",
+        }
+        return Response(response_data, status=status.HTTP_201_CREATED)
+    
+    else:
+        response_data = {
+            "status": 400,
+            "title": "Validation Error",
+            "message": "Form validation error.",
+            "error": serializer.errors,
+            "stable": "true",
+        }
+        return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
