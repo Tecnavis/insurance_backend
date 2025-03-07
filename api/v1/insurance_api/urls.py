@@ -21,7 +21,9 @@ urlpatterns = [
     path('subcategories/<int:subcategory_id>/', views.update_subcategory, name='update_subcategory'),
     path('subcategories/<int:subcategory_id>/delete/', views.delete_subcategory, name='delete_subcategory'),
 
-
+    path("policy-owners/", views.list_policy_owners, name="list-policy-owners"),
     path("policy-owner/create/", views.create_policy_owner, name="create-policy-owner"),
+    path("policy-owner/<int:id>/", views.update_policy_owner, name="update-policy-owner"),
+    path("policy-owner/<int:id>/delete/", views.delete_policy_owner, name="delete-policy-owner"),
    
 ]

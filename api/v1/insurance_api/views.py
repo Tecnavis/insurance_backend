@@ -299,3 +299,38 @@ def create_policy_owner(request):
             "stable": "true",
         }
         return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+
+# list policy owners
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def list_policy_owners(request):
+    policy_owners = PolicyOwner.objects.all()
+    serializer = PolicyOwnerSerializer(policy_owners, many=True)
+    return Response(serializer.data)
+
+# update policy owner
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_policy_owner(request, id):
+    try:
+        policy_owner = PolicyOwner.objects.get(id=id)
+    except PolicyOwner.DoesNotExist:
+        return Response({"message": "Policy owner not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = PolicyOwnerSerializer(policy_owner, data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# delete policy owner
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_policy_owner(request, id):
+    try:
+        policy_owner = PolicyOwner.objects.get(id=id)
+    except PolicyOwner.DoesNotExist:
+        return Response({"message": "Policy owner not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    policy_owner.delete()
+    return Response({"message": "Policy owner deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
