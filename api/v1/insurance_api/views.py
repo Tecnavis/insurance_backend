@@ -109,12 +109,63 @@ def delete_subcategory(request, subcategory_id):
 # create insurance
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def create_insurance(request):
+def create(request):
     serializer = InsurancePolicySerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=201)
-    return Response(serializer.errors, status=400)      
+    return Response(serializer.errors, status=400)  
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_insurance(request):
+    """
+    API endpoint to create a new insurance policy.
+    Expected POST data includes:
+    - policy_owner (ID)
+    - policy_number
+    - insurance_type
+    - category (ID)
+    - sub_category (ID)
+    - premium_amount
+    - start_date
+    - expiry_date
+    - status
+    - document (file - optional)
+    - document_url (optional)
+    """
+    try:
+        # Create a mutable copy of the data
+        data = request.data.copy()
+        
+        # Handle file upload if present
+        if 'document' in request.FILES:
+            data['document'] = request.FILES['document']
+        
+        # Create a new insurance instance
+        serializer = InsurancePolicySerializer(data=data)
+        
+        if serializer.is_valid():
+            insurance = serializer.save()
+            
+            # Return the created insurance with complete data
+            return Response({
+                'message': 'Insurance policy created successfully',
+                'insurance': serializer.data
+            }, status=status.HTTP_201_CREATED)
+        else:
+            return Response({
+                'error': serializer.errors,
+                'message': 'Failed to create insurance policy due to validation errors'
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+    except Exception as e:
+        return Response({
+            'error': str(e),
+            'message': 'An unexpected error occurred while creating the insurance policy'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)    
 
 #update insurance
 @api_view(['PUT'])
