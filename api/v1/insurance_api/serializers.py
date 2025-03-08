@@ -51,8 +51,7 @@ class InsurancePolicySerializer(serializers.ModelSerializer):
     class Meta:
         model = Insurance
         fields = [
-            'id', 'policy_number', 'customer_name', 'customer_email', 
-            'customer_phone', 'insurance_type', 'premium_amount',
+            'id', 'policy_number','premium_amount',
             'start_date', 'expiry_date', 'status', 'status_display',
             'days_remaining', 'insurance_category', 'insurance_sub_category', 'policy_owner',
             'created_at', 'updated_at'
@@ -63,3 +62,17 @@ class InsurancePolicySerializer(serializers.ModelSerializer):
             remaining = (obj.expiry_date - date.today()).days
             return max(remaining, 0)  
         return None
+
+
+class InsuranceSerializer(serializers.ModelSerializer):
+    policy_owner = serializers.PrimaryKeyRelatedField(queryset=PolicyOwner.objects.all(), required=True)
+    category = serializers.PrimaryKeyRelatedField(queryset=InsuranceCategory.objects.all(), required=True)
+    sub_category = serializers.PrimaryKeyRelatedField(queryset=InsuranceSubCategory.objects.all(), required=True)
+
+    start_date = serializers.DateField(format="%d/%m/%Y", input_formats=["%d/%m/%Y", "%Y-%m-%d"])
+    expiry_date = serializers.DateField(format="%d/%m/%Y", input_formats=["%d/%m/%Y", "%Y-%m-%d"])
+
+    class Meta:
+        model = Insurance
+        fields = '__all__'
+        read_only_fields = ["created_at", "updated_at"]

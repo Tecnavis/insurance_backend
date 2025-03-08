@@ -7,7 +7,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.decorators import permission_classes
 from rest_framework import status
 from insurance.models import InsuranceSubCategory, InsuranceCategory,PolicyOwner
-from .serializers import InsuranceCategorySerializer, InsuranceSubCategorySerializer,PolicyOwnerSerializer
+from .serializers import InsuranceCategorySerializer, InsuranceSubCategorySerializer,PolicyOwnerSerializer,InsuranceSerializer
 from rest_framework.permissions import IsAuthenticated
 from users.models import CustomUser
 
@@ -122,50 +122,62 @@ def create(request):
 @permission_classes([IsAuthenticated])
 def create_insurance(request):
     """
-    API endpoint to create a new insurance policy.
-    Expected POST data includes:
-    - policy_owner (ID)
-    - policy_number
-    - insurance_type
-    - category (ID)
-    - sub_category (ID)
-    - premium_amount
-    - start_date
-    - expiry_date
-    - status
-    - document (file - optional)
-    - document_url (optional)
+    Create an Insurance record for a policy owner.
+    Only admins, super admins, or staff can perform this action.
     """
-    try:
-        # Create a mutable copy of the data
-        data = request.data.copy()
+    serializer = InsuranceSerializer(data=request.data)
+    
+    if serializer.is_valid():
+        policy_number = serializer.validated_data.get("policy_number")
+        policy_owner = serializer.validated_data.get("policy_owner")
+        category = serializer.validated_data.get("category")
+        sub_category = serializer.validated_data.get("sub_category")
+        premium_amount = serializer.validated_data.get("premium_amount")
+        start_date = serializer.validated_data.get("start_date")
+        expiry_date = serializer.validated_data.get("expiry_date")
+        status_choice = serializer.validated_data.get("status")
+        document = serializer.validated_data.get("document")
+        document_url = serializer.validated_data.get("document_url")
+        # Check if an insurance record already exists for this policy number
+        if Insurance.objects.filter(policy_number=policy_number).exists():
+            return Response(
+                {"status": 400, "title": "Already Exists", "message": "Insurance record already exists for this policy number."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Create Insurance record
+        insurance = Insurance.objects.create(
+            policy_number=policy_number,
+            policy_owner=policy_owner,
+            category=category,
+            sub_category=sub_category,
+            premium_amount=premium_amount,
+            start_date=start_date,
+            expiry_date=expiry_date,
+            status=status_choice,
+            document=document,
+            document_url=document_url,
+        )
         
-        # Handle file upload if present
-        if 'document' in request.FILES:
-            data['document'] = request.FILES['document']
-        
-        # Create a new insurance instance
-        serializer = InsurancePolicySerializer(data=data)
-        
-        if serializer.is_valid():
-            insurance = serializer.save()
-            
-            # Return the created insurance with complete data
-            return Response({
-                'message': 'Insurance policy created successfully',
-                'insurance': serializer.data
-            }, status=status.HTTP_201_CREATED)
-        else:
-            return Response({
-                'error': serializer.errors,
-                'message': 'Failed to create insurance policy due to validation errors'
-            }, status=status.HTTP_400_BAD_REQUEST)
-            
-    except Exception as e:
-        return Response({
-            'error': str(e),
-            'message': 'An unexpected error occurred while creating the insurance policy'
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)    
+        response_data = {
+            "status": 200,
+            "title": "Successfully Created",
+            "message": "Insurance policy created successfully.",
+            "data": serializer.data,
+            "redirect": "true",
+        }
+        return Response(response_data, status=status.HTTP_201_CREATED)
+    
+    else:
+        response_data = {
+            "status": 400,
+            "title": "Validation Error",
+            "message": "Form validation error.",
+            "error": serializer.errors,
+            "stable": "true",
+        }
+        return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+
 
 #update insurance
 @api_view(['PUT'])
